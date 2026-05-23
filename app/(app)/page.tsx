@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
+import { InstallHint } from '@/components/InstallHint'
 
 export const dynamic = 'force-dynamic'
 
@@ -106,6 +107,8 @@ export default async function Home() {
           )
         })}
       </div>
+
+      <InstallHint />
     </div>
   )
 }

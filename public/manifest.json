@@ -1,22 +1,27 @@
 {
   "name": "Familia",
   "short_name": "Familia",
-  "description": "App de la familia: servicios, medicación y mascotas",
+  "description": "App de la familia: servicios del hogar, medicación y mascotas en un solo lugar",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#18181b",
   "orientation": "portrait",
+  "background_color": "#FAF6F0",
+  "theme_color": "#7A8F6B",
+  "lang": "es-AR",
+  "categories": ["productivity", "lifestyle"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512-maskable.png",
