@@ -1,0 +1,62 @@
+export type Servicio = {
+  id: string
+  nombre: string
+  rubro: string
+  telefono: string | null
+  whatsapp: string | null
+  direccion: string | null
+  notas: string | null
+  ultimo_contacto: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type ServicioInput = {
+  nombre: string
+  rubro: string
+  telefono?: string | null
+  whatsapp?: string | null
+  direccion?: string | null
+  notas?: string | null
+  ultimo_contacto?: string | null
+}
+
+export type Medicamento = {
+  id: string
+  persona: string
+  nombre_medicamento: string
+  dosis: string | null
+  frecuencia: string | null
+  horario: string[] | null
+  recetado_por: string | null
+  notas: string | null
+  activo: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type Mascota = {
+  id: string
+  nombre: string
+  especie: string | null
+  raza: string | null
+  fecha_nacimiento: string | null
+  veterinario_nombre: string | null
+  veterinario_telefono: string | null
+  alimento: string | null
+  notas: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type MascotaEvento = {
+  id: string
+  mascota_id: string
+  tipo: string
+  fecha: string
+  detalle: string | null
+  proxima_fecha: string | null
+  created_at: string
+}
