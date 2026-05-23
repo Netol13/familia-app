@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -48,6 +50,7 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${inter.variable} ${fraunces.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -58,7 +61,20 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Familia" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
+          <div
+            className="fixed z-50 right-3"
+            style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
+          >
+            <ThemeToggle />
+          </div>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
