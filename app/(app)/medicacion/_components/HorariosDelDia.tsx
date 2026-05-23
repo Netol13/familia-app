@@ -9,6 +9,26 @@ type Toma = {
   dosis: string | null
 }
 
+const HHMM = /^\d{2}:\d{2}$/
+
+function rank(h: string): number {
+  if (HHMM.test(h)) {
+    const [hh, mm] = h.split(':').map(Number)
+    return hh * 60 + mm
+  }
+  if (h === 'Mañana') return 7 * 60
+  if (h === 'Tarde') return 14 * 60
+  if (h === 'Noche') return 21 * 60
+  return 99 * 60
+}
+
+function icon(h: string): string {
+  if (h === 'Mañana') return '🌅'
+  if (h === 'Tarde') return '☀️'
+  if (h === 'Noche') return '🌙'
+  return '🕐'
+}
+
 export function HorariosDelDia({ medicamentos }: { medicamentos: Medicamento[] }) {
   const tomas: Toma[] = []
   for (const m of medicamentos) {
@@ -23,7 +43,7 @@ export function HorariosDelDia({ medicamentos }: { medicamentos: Medicamento[] }
       })
     }
   }
-  tomas.sort((a, b) => a.hora.localeCompare(b.hora))
+  tomas.sort((a, b) => rank(a.hora) - rank(b.hora))
 
   if (tomas.length === 0) return null
 
@@ -44,8 +64,11 @@ export function HorariosDelDia({ medicamentos }: { medicamentos: Medicamento[] }
       <div className="space-y-2">
         {Array.from(grupos.entries()).map(([hora, lista]) => (
           <div key={hora} className="flex gap-3 items-start">
-            <div className="font-mono text-sm font-medium tabular-nums w-12 shrink-0 text-foreground">
-              {hora}
+            <div className="text-sm font-medium w-20 shrink-0 text-foreground flex items-center gap-1">
+              <span>{icon(hora)}</span>
+              <span className={HHMM.test(hora) ? 'font-mono tabular-nums' : ''}>
+                {hora}
+              </span>
             </div>
             <div className="flex-1 space-y-1 min-w-0">
               {lista.map((t, i) => (

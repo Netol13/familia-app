@@ -69,14 +69,20 @@ export function MedicamentoCard({
 
         {medicamento.horario && medicamento.horario.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
-            {medicamento.horario.map((h) => (
-              <span
-                key={h}
-                className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground"
-              >
-                🕐 {h}
-              </span>
-            ))}
+            {medicamento.horario.map((h) => {
+              const icon =
+                h === 'Mañana' ? '🌅' :
+                h === 'Tarde' ? '☀️' :
+                h === 'Noche' ? '🌙' : '🕐'
+              return (
+                <span
+                  key={h}
+                  className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground"
+                >
+                  {icon} {h}
+                </span>
+              )
+            })}
           </div>
         )}
 
