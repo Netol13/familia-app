@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { MedicamentoCard } from './MedicamentoCard'
 import { MedicamentoFormDialog } from './MedicamentoFormDialog'
 import { HorariosDelDia } from './HorariosDelDia'
+import { EmptyState } from '@/components/EmptyState'
 import type { Medicamento } from '@/lib/types'
 
 export function MedicamentosList({ medicamentos }: { medicamentos: Medicamento[] }) {
@@ -98,11 +99,23 @@ export function MedicamentosList({ medicamentos }: { medicamentos: Medicamento[]
       )}
 
       {filtrados.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">
-          {medicamentos.length === 0
-            ? 'Todavía no hay medicamentos. Tocá "+ Nuevo" para agregar el primero.'
-            : 'No hay medicamentos que coincidan con el filtro.'}
-        </div>
+        medicamentos.length === 0 ? (
+          <EmptyState
+            emoji="💊"
+            title="Sin medicamentos cargados"
+            description="Anotá la medicación de cada miembro de la familia con sus horarios para no olvidarse de ninguna toma."
+            action={
+              <MedicamentoFormDialog
+                personasExistentes={[]}
+                trigger={<Button>+ Agregar el primero</Button>}
+              />
+            }
+          />
+        ) : (
+          <div className="text-center py-12 text-muted-foreground text-sm">
+            No hay medicamentos que coincidan con el filtro.
+          </div>
+        )
       ) : (
         <div className="space-y-5">
           {grupos.map(([persona, lista]) => (

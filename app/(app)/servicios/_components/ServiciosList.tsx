@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { ServicioCard } from './ServicioCard'
 import { ServicioFormDialog } from './ServicioFormDialog'
+import { EmptyState } from '@/components/EmptyState'
 import type { Servicio } from '@/lib/types'
 
 export function ServiciosList({ servicios }: { servicios: Servicio[] }) {
@@ -74,11 +75,23 @@ export function ServiciosList({ servicios }: { servicios: Servicio[] }) {
       )}
 
       {filtrados.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">
-          {servicios.length === 0
-            ? 'Todavía no hay servicios. Tocá "+ Nuevo" para agregar el primero.'
-            : 'No hay servicios que coincidan con el filtro.'}
-        </div>
+        servicios.length === 0 ? (
+          <EmptyState
+            emoji="🔧"
+            title="Todavía sin contactos"
+            description="Plomero, electricista, jardinero... agregá los servicios del hogar para tenerlos siempre a mano."
+            action={
+              <ServicioFormDialog
+                rubrosExistentes={[]}
+                trigger={<Button>+ Agregar el primero</Button>}
+              />
+            }
+          />
+        ) : (
+          <div className="text-center py-12 text-muted-foreground text-sm">
+            No hay servicios que coincidan con el filtro.
+          </div>
+        )
       ) : (
         <div className="grid gap-3">
           {filtrados.map((s) => (

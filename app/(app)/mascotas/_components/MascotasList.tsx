@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { MascotaCard } from './MascotaCard'
 import { MascotaFormDialog } from './MascotaFormDialog'
+import { EmptyState } from '@/components/EmptyState'
 import type { Mascota, MascotaEvento } from '@/lib/types'
 
 export function MascotasList({
@@ -21,9 +22,16 @@ export function MascotasList({
       </div>
 
       {mascotas.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">
-          Todavía no hay mascotas. Tocá "+ Nueva mascota" para agregar la primera.
-        </div>
+        <EmptyState
+          emoji="🐾"
+          title="Sin mascotas"
+          description="Cargá los datos de las mascotas para llevar el control de vacunas, controles y peso."
+          action={
+            <MascotaFormDialog
+              trigger={<Button>+ Agregar la primera</Button>}
+            />
+          }
+        />
       ) : (
         <div className="grid gap-4">
           {mascotas.map((m) => (

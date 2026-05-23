@@ -34,17 +34,19 @@ export default function LoginPage() {
 
   return (
     <main className="flex-1 flex items-center justify-center p-6">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Familia</h1>
-          <p className="text-sm text-muted-foreground">
+      <div className="w-full max-w-sm space-y-8">
+        <div className="text-center space-y-3">
+          <div className="text-5xl leading-none">🏡</div>
+          <h1 className="text-4xl font-medium">Familia</h1>
+          <p className="text-sm text-muted-foreground italic">
             Ingresá con tu email para acceder
           </p>
         </div>
 
         {status === 'sent' ? (
-          <div className="rounded-lg border bg-card p-6 text-center space-y-2">
-            <p className="font-medium">Revisá tu email 📬</p>
+          <div className="rounded-2xl border border-border/60 bg-card p-6 text-center space-y-2 shadow-sm">
+            <p className="text-2xl">📬</p>
+            <p className="font-medium">Revisá tu email</p>
             <p className="text-sm text-muted-foreground">
               Te mandamos un link para entrar a <strong>{email}</strong>. Abrilo desde el mismo dispositivo.
             </p>

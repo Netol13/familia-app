@@ -37,9 +37,9 @@ export default async function MascotasPage() {
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <header>
-        <h1 className="text-2xl font-bold">Mascotas</h1>
+    <div className="p-6 space-y-5">
+      <header className="space-y-1">
+        <h1 className="text-3xl font-medium">Mascotas</h1>
         <p className="text-sm text-muted-foreground">
           Datos, veterinario, vacunas y controles
         </p>
