@@ -3,6 +3,7 @@ import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SettingsButton } from "@/components/SettingsButton";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -68,9 +69,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div
-            className="fixed z-50 right-3"
+            className="fixed z-50 right-3 flex gap-2"
             style={{ top: 'max(0.75rem, env(safe-area-inset-top))' }}
           >
+            <SettingsButton />
             <ThemeToggle />
           </div>
           {children}
