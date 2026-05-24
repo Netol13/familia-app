@@ -31,6 +31,14 @@ const sections = [
     countFrom: 'mascotas' as const,
     countLabel: (n: number) => `${n} mascota${n === 1 ? '' : 's'}`,
   },
+  {
+    href: '/documentos',
+    title: 'Documentos',
+    description: 'Facturas, garantías, recetas y papeles importantes',
+    emoji: '📄',
+    countFrom: 'documentos' as const,
+    countLabel: (n: number) => `${n} documento${n === 1 ? '' : 's'}`,
+  },
 ]
 
 function saludoPorHora(): string {
@@ -51,19 +59,21 @@ export default async function Home() {
     .eq('user_id', user?.id ?? '')
     .single()
 
-  const [servCount, medCount, mascCount] = await Promise.all([
+  const [servCount, medCount, mascCount, docCount] = await Promise.all([
     supabase.from('servicios').select('*', { count: 'exact', head: true }),
     supabase
       .from('medicamentos')
       .select('*', { count: 'exact', head: true })
       .eq('activo', true),
     supabase.from('mascotas').select('*', { count: 'exact', head: true }),
+    supabase.from('documentos').select('*', { count: 'exact', head: true }),
   ])
 
   const counts: Record<string, number> = {
     servicios: servCount.count ?? 0,
     medicamentos: medCount.count ?? 0,
     mascotas: mascCount.count ?? 0,
+    documentos: docCount.count ?? 0,
   }
 
   const nombre = member?.nombre ?? 'familia'

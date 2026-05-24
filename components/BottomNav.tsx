@@ -8,6 +8,7 @@ const items = [
   { href: '/servicios', label: 'Servicios', icon: '🔧' },
   { href: '/medicacion', label: 'Medicación', icon: '💊' },
   { href: '/mascotas', label: 'Mascotas', icon: '🐾' },
+  { href: '/documentos', label: 'Docs', icon: '📄' },
 ]
 
 export function BottomNav() {

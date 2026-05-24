@@ -60,3 +60,52 @@ export type MascotaEvento = {
   proxima_fecha: string | null
   created_at: string
 }
+
+export const TIPOS_DOCUMENTO = [
+  'factura',
+  'garantia',
+  'receta',
+  'contrato',
+  'manual',
+  'seguro',
+  'otro',
+] as const
+
+export type TipoDocumento = (typeof TIPOS_DOCUMENTO)[number]
+
+export type Documento = {
+  id: string
+  nombre: string
+  descripcion: string | null
+  tipo: TipoDocumento
+  persona_id: string | null
+  mascota_id: string | null
+  storage_path: string
+  mime_type: string
+  size_bytes: number
+  fecha_documento: string | null
+  vencimiento: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type DocumentoMetadataInput = {
+  nombre: string
+  descripcion?: string | null
+  tipo: TipoDocumento
+  persona_id?: string | null
+  mascota_id?: string | null
+  fecha_documento?: string | null
+  vencimiento?: string | null
+}
+
+export type FamilyMemberLite = {
+  id: string
+  nombre: string
+}
+
+export type MascotaLite = {
+  id: string
+  nombre: string
+}
