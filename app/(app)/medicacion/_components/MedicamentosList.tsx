@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { MedicamentoCard } from './MedicamentoCard'
 import { MedicamentoFormDialog } from './MedicamentoFormDialog'
-import { HorariosDelDia } from './HorariosDelDia'
 import { EmptyState } from '@/components/EmptyState'
 import type { Medicamento } from '@/lib/types'
 
@@ -46,8 +45,6 @@ export function MedicamentosList({ medicamentos }: { medicamentos: Medicamento[]
 
   return (
     <div className="space-y-4">
-      <HorariosDelDia medicamentos={medicamentos} />
-
       <div className="flex gap-2">
         <Input
           placeholder="Buscar..."
