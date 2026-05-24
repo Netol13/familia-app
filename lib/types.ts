@@ -109,3 +109,58 @@ export type MascotaLite = {
   id: string
   nombre: string
 }
+
+export const TIPOS_EVENTO = ['cumple', 'vencimiento', 'turno', 'otro'] as const
+
+export type TipoEvento = (typeof TIPOS_EVENTO)[number]
+
+export type Evento = {
+  id: string
+  titulo: string
+  descripcion: string | null
+  fecha: string
+  tipo: TipoEvento
+  persona_id: string | null
+  mascota_id: string | null
+  recurrente_anual: boolean
+  completado: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type OrigenEvento = 'custom' | 'documento' | 'mascota'
+
+export type TipoUnificado = TipoEvento | 'doc-vence' | 'mascota-proxima'
+
+export type EventoUnificado = {
+  id: string
+  origen: OrigenEvento
+  origen_id: string
+  fecha: string
+  titulo: string
+  subtitulo: string | null
+  tipo: TipoUnificado
+  completado: boolean
+  href: string
+  recurrente_anual: boolean
+}
+
+// Slices ligeros para feeder del calendario (lo que pasa la page al unificador)
+export type DocumentoCalendarioLite = {
+  id: string
+  nombre: string
+  tipo: string
+  vencimiento: string
+  persona_id: string | null
+  mascota_id: string | null
+}
+
+export type MascotaEventoLite = {
+  id: string
+  mascota_id: string
+  tipo: string
+  fecha: string
+  detalle: string | null
+  proxima_fecha: string
+}
