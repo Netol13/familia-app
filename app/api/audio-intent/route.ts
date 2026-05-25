@@ -1,11 +1,11 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { AudioIntentRequest, IntentResult } from '@/lib/audio-intent'
 
 export const maxDuration = 15
 
-const client = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '')
+const GEMINI_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
 
 function buildSystemPrompt(req: AudioIntentRequest): string {
   const mascotasStr =
@@ -61,16 +61,34 @@ function fallback(transcript: string): IntentResult {
 }
 
 async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
-  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' })
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    console.error('[audio-intent] GEMINI_API_KEY no configurada')
+    return fallback(body.transcript)
+  }
 
   let raw = ''
   try {
-    const response = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: body.transcript }] }],
-      systemInstruction: buildSystemPrompt(body),
-      generationConfig: { maxOutputTokens: 1024 },
+    const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: buildSystemPrompt(body) }] },
+        contents: [{ role: 'user', parts: [{ text: body.transcript }] }],
+        generationConfig: { maxOutputTokens: 1024, temperature: 0.1 },
+      }),
     })
-    raw = response.response.text()
+
+    if (!res.ok) {
+      const err = await res.text()
+      console.error('[audio-intent] Gemini HTTP error:', res.status, err)
+      return fallback(body.transcript)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = await res.json()
+    raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    console.log('[audio-intent] Gemini raw:', raw)
   } catch (e) {
     console.error('[audio-intent] Gemini call failed:', e)
     return fallback(body.transcript)
