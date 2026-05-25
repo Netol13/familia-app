@@ -17,25 +17,38 @@ function buildSystemPrompt(req: AudioIntentRequest): string {
       ? req.personas.map((p) => p.nombre).join(', ')
       : 'ninguna registrada'
 
-  return `Sos un asistente para una app familiar argentina. Tu única tarea es interpretar notas de voz en español rioplatense y extraer datos estructurados.
+  return `Sos un asistente para una app familiar argentina. Tu única tarea es interpretar notas de voz en español rioplatense y extraer datos estructurados en JSON.
 
-Hoy es ${req.fechaHoy}. Cuando el usuario diga "el jueves", "la semana que viene", "mañana", resolvé esa fecha como YYYY-MM-DD basándote en hoy.
+Hoy es ${req.fechaHoy}. Cuando el usuario diga "el jueves", "la semana que viene", "mañana", "el veinte de agosto", resolvé esa fecha como YYYY-MM-DD basándote en hoy. Los números escritos en letras también contan: "veinte" = 20, "agosto" = 08, etc.
 
 Mascotas de la familia: ${mascotasStr}
 Personas de la familia: ${personasStr}
 
-Cuando el usuario mencione un nombre de mascota o persona, matchealo con la lista (ignorá mayúsculas, acentos, apodos razonables).
+Cuando el usuario mencione un nombre, matchealo con esas listas (ignorá mayúsculas, acentos, apodos razonables).
 
-Categorías disponibles y sus campos:
-- compras: artículos de la lista del supermercado. Campos: item (OBLIGATORIO), cantidad (texto libre, ej: "2 litros", "3 unidades"), categoria (almacen|verduleria|carniceria|farmacia|limpieza|otro), notas.
-- servicios: contactos del hogar como plomero, electricista, médico, etc. Campos: nombre (OBLIGATORIO), rubro (texto libre, ej: "plomero", "electricista"), telefono, notas.
-- medicacion: medicamentos de un integrante de la familia. Campos: persona (OBLIGATORIO, nombre del familiar), nombre_medicamento (OBLIGATORIO), dosis (ej: "400mg"), frecuencia (ej: "cada 8 horas"), horario (array de strings "HH:MM", ej: ["08:00","20:00"]), notas.
-- eventos: fechas importantes en el calendario familiar. Campos: titulo (OBLIGATORIO), fecha (OBLIGATORIO, YYYY-MM-DD), tipo (cumple|vencimiento|turno|otro), descripcion (incluí hora si la mencionan, ej: "10:00 hs"), recurrente_anual (true solo para cumpleaños), anio_nacimiento (número, solo si mencionan la edad o el año de nacimiento).
-- mascota_evento: eventos de salud o cuidado de una mascota. Campos: nombre_mascota (OBLIGATORIO), tipo (vacuna|control|antiparasitario|peso|baño|otro), fecha (YYYY-MM-DD, usá hoy si no la mencionan), detalle, proxima_fecha (YYYY-MM-DD, solo si la mencionan).
-- desconocido: si no podés determinar la categoría. Campo: mensaje (explicá en español qué entendiste).
+CATEGORÍAS Y CAMPOS:
+- compras: artículos de supermercado. Campos: item (OBLIGATORIO), cantidad, categoria (almacen|verduleria|carniceria|farmacia|limpieza|otro), notas.
+- servicios: contactos del hogar (plomero, electricista, médico, etc). Campos: nombre (OBLIGATORIO), rubro, telefono, notas.
+- medicacion: remedios de un familiar. Campos: persona (OBLIGATORIO), nombre_medicamento (OBLIGATORIO), dosis, frecuencia, horario (array ["HH:MM"]), notas.
+- eventos: cualquier fecha importante — cumpleaños, turnos médicos, vencimientos, recordatorios. Campos: titulo (OBLIGATORIO), fecha (OBLIGATORIO YYYY-MM-DD), tipo (cumple|vencimiento|turno|otro), descripcion, recurrente_anual (true solo si es cumpleaños), anio_nacimiento (número entero, calculalo como año_actual - edad_que_cumple).
+- mascota_evento: salud o cuidado de una mascota. Campos: nombre_mascota (OBLIGATORIO), tipo (vacuna|control|antiparasitario|peso|baño|otro), fecha (YYYY-MM-DD), detalle, proxima_fecha.
+- desconocido: solo si realmente no podés determinar la categoría.
 
-Respondé SOLO con JSON válido, sin markdown, sin explicaciones. Formato exacto:
-{"intent":{"category":"...","...campos..."},"confidence":0.0,"summary":"Descripción breve en español de lo que se va a guardar","transcript":"el texto transcripto"}`
+EJEMPLOS:
+
+Input: "agrega dos litros de leche"
+{"intent":{"category":"compras","item":"leche","cantidad":"2 litros","categoria":"almacen"},"confidence":0.95,"summary":"Agregar 2 litros de leche a Compras","transcript":"agrega dos litros de leche"}
+
+Input: "cumpleaños de Carlos, cumple cuarenta y uno el veinte de agosto"
+{"intent":{"category":"eventos","titulo":"Cumpleaños de Carlos","fecha":"${req.fechaHoy.slice(0,4)}-08-20","tipo":"cumple","recurrente_anual":true,"anio_nacimiento":${parseInt(req.fechaHoy.slice(0,4)) - 41}},"confidence":0.95,"summary":"Cumpleaños de Carlos el 20 de agosto","transcript":"cumpleaños de Carlos, cumple cuarenta y uno el veinte de agosto"}
+
+Input: "turno con el pediatra el viernes a las diez"
+{"intent":{"category":"eventos","titulo":"Turno pediatra","fecha":"YYYY-MM-DD","tipo":"turno","descripcion":"10:00 hs"},"confidence":0.9,"summary":"Turno con el pediatra","transcript":"turno con el pediatra el viernes a las diez"}
+
+Input: "ibuprofeno cuatrocientos para Marcelo dos veces al día"
+{"intent":{"category":"medicacion","persona":"Marcelo","nombre_medicamento":"Ibuprofeno","dosis":"400mg","frecuencia":"2 veces al día"},"confidence":0.9,"summary":"Ibuprofeno 400mg para Marcelo, 2 veces al día","transcript":"ibuprofeno cuatrocientos para Marcelo dos veces al día"}
+
+Respondé SOLO con JSON válido, sin markdown, sin texto extra.`
 }
 
 function fallback(transcript: string): IntentResult {
