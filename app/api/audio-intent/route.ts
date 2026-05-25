@@ -38,30 +38,39 @@ Respondé SOLO con JSON válido, sin markdown, sin explicaciones. Formato exacto
 {"intent":{"category":"...","...campos..."},"confidence":0.0,"summary":"Descripción breve en español de lo que se va a guardar","transcript":"el texto transcripto"}`
 }
 
-async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
-  const model = client.getGenerativeModel({
-    model: 'gemini-1.5-flash',
-    systemInstruction: buildSystemPrompt(body),
-    generationConfig: {
-      maxOutputTokens: 1024,
-      responseMimeType: 'application/json',
-    },
-  })
+function fallback(transcript: string): IntentResult {
+  return {
+    intent: { category: 'desconocido', mensaje: 'No se pudo interpretar la nota.' },
+    confidence: 0,
+    summary: 'No se pudo determinar qué guardar',
+    transcript,
+  }
+}
 
-  const response = await model.generateContent(body.transcript)
-  const raw = response.response.text()
-  const cleaned = raw.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim()
+async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
+  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' })
+
+  let raw = ''
+  try {
+    const response = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: body.transcript }] }],
+      systemInstruction: buildSystemPrompt(body),
+      generationConfig: { maxOutputTokens: 1024 },
+    })
+    raw = response.response.text()
+  } catch (e) {
+    console.error('[audio-intent] Gemini call failed:', e)
+    return fallback(body.transcript)
+  }
+
+  const match = raw.match(/\{[\s\S]*\}/)
+  const cleaned = match ? match[0] : raw.trim()
 
   try {
     return JSON.parse(cleaned) as IntentResult
   } catch (e) {
     console.error('[audio-intent] JSON parse error:', e, 'raw:', raw)
-    return {
-      intent: { category: 'desconocido', mensaje: 'No se pudo interpretar la nota.' },
-      confidence: 0,
-      summary: 'No se pudo determinar qué guardar',
-      transcript: body.transcript,
-    }
+    return fallback(body.transcript)
   }
 }
 
