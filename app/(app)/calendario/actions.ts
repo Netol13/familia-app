@@ -34,6 +34,18 @@ function normalize(form: FormData) {
   // recurrente_anual solo aplica a cumple
   const recurrente_anual = tipo === 'cumple' && getBoolean(form, 'recurrente_anual')
 
+  // edad_actual → anio_nacimiento (solo para cumpleaños, opcional)
+  let anio_nacimiento: number | null = null
+  if (tipo === 'cumple') {
+    const edadStr = (form.get('edad_actual') as string | null)?.trim()
+    if (edadStr && edadStr !== '') {
+      const edad = parseInt(edadStr, 10)
+      if (!isNaN(edad) && edad >= 0 && edad <= 130) {
+        anio_nacimiento = new Date().getFullYear() - edad
+      }
+    }
+  }
+
   return {
     titulo,
     descripcion: getString(form, 'descripcion'),
@@ -42,6 +54,7 @@ function normalize(form: FormData) {
     persona_id: getString(form, 'persona_id'),
     mascota_id: getString(form, 'mascota_id'),
     recurrente_anual,
+    anio_nacimiento,
   }
 }
 

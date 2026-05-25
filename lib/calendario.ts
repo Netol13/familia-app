@@ -92,6 +92,12 @@ export function unificarEventos({
     const mascota = nombreMascota(e.mascota_id)
     if (persona) ctx.push(persona)
     if (mascota) ctx.push(`🐾 ${mascota}`)
+    // Para cumpleaños con año de nacimiento guardado, calcular edad en la próxima ocurrencia
+    if (e.tipo === 'cumple' && e.anio_nacimiento != null) {
+      const anioCumple = Number(fechaEfectiva.split('-')[0])
+      const edad = anioCumple - e.anio_nacimiento
+      ctx.push(`Cumple ${edad} años`)
+    }
     unificados.push({
       id: `evt:${e.id}`,
       origen: 'custom',

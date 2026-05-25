@@ -124,6 +124,7 @@ export type Evento = {
   mascota_id: string | null
   recurrente_anual: boolean
   completado: boolean
+  anio_nacimiento: number | null
   created_by: string | null
   created_at: string
   updated_at: string

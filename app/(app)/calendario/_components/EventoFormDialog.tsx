@@ -164,21 +164,46 @@ export function EventoFormDialog({ trigger, evento, members, mascotas }: Props) 
           </div>
 
           {tipoActual === 'cumple' && (
-            <label className="flex items-start gap-2 text-sm cursor-pointer">
-              <input
-                type="checkbox"
-                name="recurrente_anual"
-                checked={recurrente}
-                onChange={(e) => setRecurrente(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-input"
-              />
-              <span>
-                Se repite cada año
-                <span className="block text-xs text-muted-foreground">
-                  Para cumpleaños, aniversarios. La app muestra siempre la próxima ocurrencia.
+            <>
+              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="recurrente_anual"
+                  checked={recurrente}
+                  onChange={(e) => setRecurrente(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-input"
+                />
+                <span>
+                  Se repite cada año
+                  <span className="block text-xs text-muted-foreground">
+                    Para cumpleaños, aniversarios. La app muestra siempre la próxima ocurrencia.
+                  </span>
                 </span>
-              </span>
-            </label>
+              </label>
+
+              <div className="space-y-2">
+                <Label htmlFor="edad_actual">
+                  Edad que cumple este año{' '}
+                  <span className="text-muted-foreground font-normal">(opcional)</span>
+                </Label>
+                <Input
+                  id="edad_actual"
+                  name="edad_actual"
+                  type="number"
+                  min={0}
+                  max={130}
+                  placeholder="ej: 57"
+                  defaultValue={
+                    evento?.anio_nacimiento != null
+                      ? new Date().getFullYear() - evento.anio_nacimiento
+                      : ''
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  Si lo completás, la app mostrará &quot;Cumple X años&quot; y lo irá actualizando solo cada año.
+                </p>
+              </div>
+            </>
           )}
 
           <div className="grid grid-cols-2 gap-3">
