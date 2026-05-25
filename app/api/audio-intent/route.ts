@@ -42,7 +42,10 @@ async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
   const model = client.getGenerativeModel({
     model: 'gemini-1.5-flash',
     systemInstruction: buildSystemPrompt(body),
-    generationConfig: { maxOutputTokens: 512 },
+    generationConfig: {
+      maxOutputTokens: 1024,
+      responseMimeType: 'application/json',
+    },
   })
 
   const response = await model.generateContent(body.transcript)
@@ -51,7 +54,8 @@ async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
 
   try {
     return JSON.parse(cleaned) as IntentResult
-  } catch {
+  } catch (e) {
+    console.error('[audio-intent] JSON parse error:', e, 'raw:', raw)
     return {
       intent: { category: 'desconocido', mensaje: 'No se pudo interpretar la nota.' },
       confidence: 0,
@@ -82,7 +86,8 @@ export async function POST(req: NextRequest) {
   try {
     const result = await extractIntent(body)
     return NextResponse.json(result)
-  } catch {
+  } catch (e) {
+    console.error('[audio-intent] extractIntent error:', e)
     return NextResponse.json({ error: 'Error al procesar la nota' }, { status: 500 })
   }
 }
