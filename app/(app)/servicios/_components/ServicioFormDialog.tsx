@@ -28,6 +28,13 @@ export function ServicioFormDialog({ trigger, servicio, rubrosExistentes = [] }:
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const isEdit = !!servicio
+  const tieneExtras = !!(
+    servicio?.telefono ||
+    servicio?.direccion ||
+    servicio?.notas ||
+    servicio?.ultimo_contacto
+  )
+  const [expandido, setExpandido] = useState(tieneExtras)
 
   function handleSubmit(formData: FormData) {
     setError(null)
@@ -87,62 +94,72 @@ export function ServicioFormDialog({ trigger, servicio, rubrosExistentes = [] }:
             </datalist>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="telefono">Teléfono</Label>
-              <Input
-                id="telefono"
-                name="telefono"
-                type="tel"
-                defaultValue={servicio?.telefono ?? ''}
-                placeholder="11 5555 5555"
-                inputMode="tel"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="whatsapp">WhatsApp</Label>
-              <Input
-                id="whatsapp"
-                name="whatsapp"
-                type="tel"
-                defaultValue={servicio?.whatsapp ?? ''}
-                placeholder="11 5555 5555"
-                inputMode="tel"
-              />
-            </div>
-          </div>
-
           <div className="space-y-2">
-            <Label htmlFor="direccion">Dirección</Label>
+            <Label htmlFor="whatsapp">WhatsApp</Label>
             <Input
-              id="direccion"
-              name="direccion"
-              defaultValue={servicio?.direccion ?? ''}
-              placeholder="Av. Siempre Viva 742"
+              id="whatsapp"
+              name="whatsapp"
+              type="tel"
+              defaultValue={servicio?.whatsapp ?? ''}
+              placeholder="11 5555 5555"
+              inputMode="tel"
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="notas">Notas</Label>
-            <Textarea
-              id="notas"
-              name="notas"
-              defaultValue={servicio?.notas ?? ''}
-              placeholder="Viene los miércoles, cobra en efectivo, etc."
-              rows={3}
-            />
-          </div>
+          <button
+            type="button"
+            onClick={() => setExpandido((v) => !v)}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {expandido ? '− Menos datos' : '+ Más datos (opcional)'}
+          </button>
 
-          <div className="space-y-2">
-            <Label htmlFor="ultimo_contacto">Último contacto</Label>
-            <Input
-              id="ultimo_contacto"
-              name="ultimo_contacto"
-              type="date"
-              defaultValue={servicio?.ultimo_contacto ?? ''}
-            />
-          </div>
+          {expandido && (
+            <div className="space-y-4 pt-1">
+              <div className="space-y-2">
+                <Label htmlFor="telefono">Teléfono</Label>
+                <Input
+                  id="telefono"
+                  name="telefono"
+                  type="tel"
+                  defaultValue={servicio?.telefono ?? ''}
+                  placeholder="11 5555 5555"
+                  inputMode="tel"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="direccion">Dirección</Label>
+                <Input
+                  id="direccion"
+                  name="direccion"
+                  defaultValue={servicio?.direccion ?? ''}
+                  placeholder="Av. Siempre Viva 742"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notas">Notas</Label>
+                <Textarea
+                  id="notas"
+                  name="notas"
+                  defaultValue={servicio?.notas ?? ''}
+                  placeholder="Viene los miércoles, cobra en efectivo, etc."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ultimo_contacto">Último contacto</Label>
+                <Input
+                  id="ultimo_contacto"
+                  name="ultimo_contacto"
+                  type="date"
+                  defaultValue={servicio?.ultimo_contacto ?? ''}
+                />
+              </div>
+            </div>
+          )}
 
           {error && <p className="text-sm text-destructive">{error}</p>}
 

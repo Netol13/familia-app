@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentMemberId } from '@/lib/family'
 import { revalidatePath } from 'next/cache'
 import { TIPOS_EVENTO, type TipoEvento } from '@/lib/types'
 
@@ -47,15 +48,11 @@ function normalize(form: FormData) {
 export async function createEvento(formData: FormData) {
   const supabase = await createClient()
   const data = normalize(formData)
-
-  const { data: member } = await supabase
-    .from('family_members')
-    .select('id')
-    .single()
+  const memberId = await getCurrentMemberId(supabase)
 
   const { error } = await supabase.from('eventos').insert({
     ...data,
-    created_by: member?.id ?? null,
+    created_by: memberId,
   })
 
   if (error) throw new Error(error.message)

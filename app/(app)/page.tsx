@@ -9,6 +9,7 @@ import {
   urgenciaDe,
 } from '@/lib/calendario'
 import type {
+  Compra,
   DocumentoCalendarioLite,
   Evento,
   FamilyMemberLite,
@@ -16,17 +17,18 @@ import type {
   MascotaLite,
   TipoUnificado,
 } from '@/lib/types'
+import { CATEGORIA_EMOJI } from '@/lib/compras'
 
 export const dynamic = 'force-dynamic'
 
 const sections = [
   {
-    href: '/servicios',
-    title: 'Servicios',
-    description: 'Plomero, electricista, piletero y todos los contactos del hogar',
-    emoji: '🔧',
-    countFrom: 'servicios' as const,
-    countLabel: (n: number) => `${n} contacto${n === 1 ? '' : 's'}`,
+    href: '/calendario',
+    title: 'Agenda',
+    description: 'Cumpleaños, vencimientos, turnos y todo lo que se viene',
+    emoji: '📅',
+    countFrom: 'eventos' as const,
+    countLabel: (n: number) => `${n} próxim${n === 1 ? 'o' : 'os'}`,
   },
   {
     href: '/medicacion',
@@ -38,14 +40,6 @@ const sections = [
       `${n} medicamento${n === 1 ? '' : 's'} activo${n === 1 ? '' : 's'}`,
   },
   {
-    href: '/mascotas',
-    title: 'Mascotas',
-    description: 'Datos, vacunas, controles y veterinario',
-    emoji: '🐾',
-    countFrom: 'mascotas' as const,
-    countLabel: (n: number) => `${n} mascota${n === 1 ? '' : 's'}`,
-  },
-  {
     href: '/documentos',
     title: 'Documentos',
     description: 'Facturas, garantías, recetas y papeles importantes',
@@ -54,12 +48,20 @@ const sections = [
     countLabel: (n: number) => `${n} documento${n === 1 ? '' : 's'}`,
   },
   {
-    href: '/calendario',
-    title: 'Calendario',
-    description: 'Cumpleaños, vencimientos, turnos y todo lo que se viene',
-    emoji: '📅',
-    countFrom: 'eventos' as const,
-    countLabel: (n: number) => `${n} próxim${n === 1 ? 'o' : 'os'}`,
+    href: '/servicios',
+    title: 'Servicios',
+    description: 'Plomero, electricista, piletero y todos los contactos del hogar',
+    emoji: '🔧',
+    countFrom: 'servicios' as const,
+    countLabel: (n: number) => `${n} contacto${n === 1 ? '' : 's'}`,
+  },
+  {
+    href: '/mascotas',
+    title: 'Mascotas',
+    description: 'Datos, vacunas, controles y veterinario',
+    emoji: '🐾',
+    countFrom: 'mascotas' as const,
+    countLabel: (n: number) => `${n} mascota${n === 1 ? '' : 's'}`,
   },
 ]
 
@@ -96,6 +98,9 @@ export default async function Home() {
     .eq('user_id', user?.id ?? '')
     .single()
 
+  const emailPrefix = user?.email?.split('@')[0] ?? null
+  const pareceEmailPrefix = !!emailPrefix && member?.nombre === emailPrefix
+
   const [
     servCount,
     medCount,
@@ -106,6 +111,7 @@ export default async function Home() {
     mascotaEventosCalRes,
     membersCalRes,
     mascotasCalRes,
+    comprasRes,
   ] = await Promise.all([
     supabase.from('servicios').select('*', { count: 'exact', head: true }),
     supabase
@@ -125,6 +131,11 @@ export default async function Home() {
       .not('proxima_fecha', 'is', null),
     supabase.from('family_members').select('id, nombre'),
     supabase.from('mascotas').select('id, nombre'),
+    supabase
+      .from('lista_compras')
+      .select('*')
+      .eq('completado', false)
+      .order('created_at', { ascending: false }),
   ])
 
   const eventos = (eventosRes.data ?? []) as Evento[]
@@ -132,6 +143,8 @@ export default async function Home() {
   const mascotaEventosCal = (mascotaEventosCalRes.data ?? []) as MascotaEventoLite[]
   const membersCal = (membersCalRes.data ?? []) as FamilyMemberLite[]
   const mascotasCal = (mascotasCalRes.data ?? []) as MascotaLite[]
+  const comprasPendientes = (comprasRes.data ?? []) as Compra[]
+  const comprasTop3 = comprasPendientes.slice(0, 3)
 
   const unificados = unificarEventos({
     eventos,
@@ -166,6 +179,59 @@ export default async function Home() {
           Lo del hogar, en un solo lugar
         </p>
       </header>
+
+      {pareceEmailPrefix && (
+        <Link
+          href="/configuracion"
+          className="block rounded-2xl border border-dashed border-border/80 bg-accent/30 px-4 py-3 hover:bg-accent/50 transition-colors"
+        >
+          <p className="text-sm">
+            👋 ¿Querés que te llamemos por tu nombre?
+          </p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Te decimos <span className="font-medium">«{nombre}»</span> porque te tomamos del email. Click para cambiarlo.
+          </p>
+        </Link>
+      )}
+
+      {comprasPendientes.length > 0 && (
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-medium">
+                🛒 Lista de compras
+                <span className="ml-2 text-xs font-normal text-muted-foreground">
+                  {comprasPendientes.length} pendiente{comprasPendientes.length === 1 ? '' : 's'}
+                </span>
+              </h2>
+              <Link
+                href="/compras"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Ver todo →
+              </Link>
+            </div>
+            <ul className="space-y-1.5">
+              {comprasTop3.map((c) => (
+                <li key={c.id} className="flex items-center gap-2 text-sm">
+                  <span className="text-base shrink-0">{CATEGORIA_EMOJI[c.categoria]}</span>
+                  <span className="truncate flex-1">
+                    {c.item}
+                    {c.cantidad && (
+                      <span className="text-muted-foreground ml-2">· {c.cantidad}</span>
+                    )}
+                  </span>
+                </li>
+              ))}
+              {comprasPendientes.length > 3 && (
+                <li className="text-xs text-muted-foreground pl-7 pt-1">
+                  +{comprasPendientes.length - 3} más
+                </li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       {proximasParaPanel.length > 0 && (
         <Card className="border-border/60 shadow-sm">

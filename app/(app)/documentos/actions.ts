@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentMemberId } from '@/lib/family'
 import { revalidatePath } from 'next/cache'
 import { TIPOS_DOCUMENTO, type TipoDocumento } from '@/lib/types'
 
@@ -70,15 +71,12 @@ export async function uploadDocumento(formData: FormData) {
   const fecha_documento = getString(formData, 'fecha_documento')
   const vencimiento = getString(formData, 'vencimiento')
 
-  const { data: member } = await supabase
-    .from('family_members')
-    .select('id')
-    .single()
+  const memberId = await getCurrentMemberId(supabase)
 
   const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : ''
   const safeBase = slug(file.name.replace(/\.[^.]+$/, '')) || 'documento'
   const stamp = Date.now()
-  const memberPrefix = member?.id ?? 'shared'
+  const memberPrefix = memberId ?? 'shared'
   const storage_path = `${memberPrefix}/${stamp}-${safeBase}${ext ? `.${ext}` : ''}`
 
   const { error: uploadError } = await supabase.storage
@@ -102,7 +100,7 @@ export async function uploadDocumento(formData: FormData) {
     size_bytes: file.size,
     fecha_documento,
     vencimiento,
-    created_by: member?.id ?? null,
+    created_by: memberId,
   })
 
   if (insertError) {

@@ -40,18 +40,40 @@ type Props = {
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 
+type Template = {
+  key: string
+  label: string
+  tipo: TipoEvento
+  titulo: string
+  recurrente: boolean
+}
+
+const TEMPLATES: Template[] = [
+  { key: 'turno', label: '🩺 Turno médico', tipo: 'turno', titulo: 'Turno ', recurrente: false },
+  { key: 'vacuna', label: '💉 Vacuna', tipo: 'otro', titulo: 'Vacuna ', recurrente: false },
+  { key: 'art', label: '📄 Vencimiento ART', tipo: 'vencimiento', titulo: 'Vence ART ', recurrente: false },
+  { key: 'cumple', label: '🎂 Cumpleaños', tipo: 'cumple', titulo: 'Cumple de ', recurrente: true },
+]
+
 export function EventoFormDialog({ trigger, evento, members, mascotas }: Props) {
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [tipoActual, setTipoActual] = useState<TipoEvento>(evento?.tipo ?? 'cumple')
   const [recurrente, setRecurrente] = useState<boolean>(evento?.recurrente_anual ?? true)
+  const [titulo, setTitulo] = useState<string>(evento?.titulo ?? '')
   const isEdit = !!evento
 
   function handleTipoChange(nuevo: TipoEvento) {
     setTipoActual(nuevo)
     // Si deja de ser cumple, el checkbox recurrente se desactiva
     if (nuevo !== 'cumple') setRecurrente(false)
+  }
+
+  function aplicarTemplate(t: Template) {
+    setTipoActual(t.tipo)
+    setRecurrente(t.recurrente)
+    setTitulo(t.titulo)
   }
 
   function handleSubmit(formData: FormData) {
@@ -82,13 +104,29 @@ export function EventoFormDialog({ trigger, evento, members, mascotas }: Props) 
         </DialogHeader>
 
         <form action={handleSubmit} className="space-y-4">
+          {!isEdit && (
+            <div className="flex flex-wrap gap-1.5">
+              {TEMPLATES.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => aplicarTemplate(t)}
+                  className="text-xs px-2.5 py-1 rounded-full border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="titulo">Título *</Label>
             <Input
               id="titulo"
               name="titulo"
               required
-              defaultValue={evento?.titulo ?? ''}
+              value={titulo}
+              onChange={(e) => setTitulo(e.target.value)}
               placeholder="Cumple de Marcelo · Turno cardiólogo · ..."
               autoCapitalize="sentences"
             />

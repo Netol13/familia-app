@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentMemberId } from '@/lib/family'
 import { revalidatePath } from 'next/cache'
 
 type MedicamentoInput = {
@@ -42,15 +43,11 @@ function normalize(input: FormData): MedicamentoInput {
 export async function createMedicamento(formData: FormData) {
   const supabase = await createClient()
   const data = normalize(formData)
-
-  const { data: member } = await supabase
-    .from('family_members')
-    .select('id')
-    .single()
+  const memberId = await getCurrentMemberId(supabase)
 
   const { error } = await supabase.from('medicamentos').insert({
     ...data,
-    created_by: member?.id ?? null,
+    created_by: memberId,
   })
   if (error) throw new Error(error.message)
   revalidatePath('/medicacion')

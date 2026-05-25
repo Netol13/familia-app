@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCurrentMemberId } from '@/lib/family'
 import { revalidatePath } from 'next/cache'
 import type { ServicioInput } from '@/lib/types'
 
@@ -25,15 +26,11 @@ function normalize(input: FormData): ServicioInput {
 export async function createServicio(formData: FormData) {
   const supabase = await createClient()
   const data = normalize(formData)
-
-  const { data: member } = await supabase
-    .from('family_members')
-    .select('id')
-    .single()
+  const memberId = await getCurrentMemberId(supabase)
 
   const { error } = await supabase.from('servicios').insert({
     ...data,
-    created_by: member?.id ?? null,
+    created_by: memberId,
   })
 
   if (error) throw new Error(error.message)

@@ -10,10 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { uploadDocumento, updateDocumentoMetadata } from '../actions'
 import {
   TIPOS_DOCUMENTO,
@@ -42,14 +43,46 @@ type Props = {
 const selectClass =
   'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50'
 
+const ACCEPT_ARCHIVO =
+  'application/pdf,image/jpeg,image/png,image/webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+function stampNombre(): string {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `Foto ${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export function DocumentoFormDialog({ trigger, documento, members, mascotas }: Props) {
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const nombreInputRef = useRef<HTMLInputElement>(null)
   const isEdit = !!documento
+
+  function onPickFile(e: React.ChangeEvent<HTMLInputElement>, esFoto: boolean) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setFileName(file.name)
+    // Limpiar el otro input para que no envíe blob de 0 bytes
+    if (esFoto && fileInputRef.current) fileInputRef.current.value = ''
+    if (!esFoto && cameraInputRef.current) cameraInputRef.current.value = ''
+    // Auto-rellenar nombre si está vacío
+    if (nombreInputRef.current && !nombreInputRef.current.value.trim()) {
+      nombreInputRef.current.value = esFoto ? stampNombre() : file.name.replace(/\.[^.]+$/, '')
+    }
+  }
 
   function handleSubmit(formData: FormData) {
     setError(null)
+    // Borrar entries 'archivo' vacías (blobs de 0 bytes de inputs no tocados)
+    const archivos = formData.getAll('archivo')
+    formData.delete('archivo')
+    const valido = archivos.find((a) => a instanceof File && a.size > 0)
+    if (valido) formData.append('archivo', valido)
+
     startTransition(async () => {
       try {
         if (isEdit) {
@@ -58,6 +91,7 @@ export function DocumentoFormDialog({ trigger, documento, members, mascotas }: P
           await uploadDocumento(formData)
         }
         setOpen(false)
+        setFileName(null)
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Error al guardar')
       }
@@ -80,20 +114,46 @@ export function DocumentoFormDialog({ trigger, documento, members, mascotas }: P
         <form action={handleSubmit} className="space-y-4">
           {!isEdit && (
             <div className="space-y-2">
-              <Label htmlFor="archivo">Archivo *</Label>
-              <Input
-                id="archivo"
-                name="archivo"
-                type="file"
-                required
-                accept="application/pdf,image/jpeg,image/png,image/webp,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              />
+              <Label>Archivo *</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <label
+                  className={buttonVariants({ variant: 'outline', size: 'lg' }) + ' cursor-pointer'}
+                >
+                  <span>📁 Subir archivo</span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    name="archivo"
+                    accept={ACCEPT_ARCHIVO}
+                    className="hidden"
+                    onChange={(e) => onPickFile(e, false)}
+                  />
+                </label>
+                <label
+                  className={buttonVariants({ variant: 'outline', size: 'lg' }) + ' cursor-pointer'}
+                >
+                  <span>📷 Sacar foto</span>
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    name="archivo"
+                    accept="image/*"
+                    capture="environment"
+                    className="hidden"
+                    onChange={(e) => onPickFile(e, true)}
+                  />
+                </label>
+              </div>
+              {fileName && (
+                <p className="text-xs text-muted-foreground">📎 {fileName}</p>
+              )}
             </div>
           )}
 
           <div className="space-y-2">
             <Label htmlFor="nombre">Nombre *</Label>
             <Input
+              ref={nombreInputRef}
               id="nombre"
               name="nombre"
               required

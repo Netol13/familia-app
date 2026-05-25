@@ -146,6 +146,31 @@ export type EventoUnificado = {
   recurrente_anual: boolean
 }
 
+export const CATEGORIAS_COMPRAS = [
+  'almacen',
+  'verduleria',
+  'carniceria',
+  'farmacia',
+  'limpieza',
+  'otro',
+] as const
+
+export type CategoriaCompra = (typeof CATEGORIAS_COMPRAS)[number]
+
+export type Compra = {
+  id: string
+  item: string
+  categoria: CategoriaCompra
+  cantidad: string | null
+  notas: string | null
+  completado: boolean
+  created_by: string | null
+  completado_por: string | null
+  completado_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 // Slices ligeros para feeder del calendario (lo que pasa la page al unificador)
 export type DocumentoCalendarioLite = {
   id: string

@@ -1,0 +1,21 @@
+-- Familia App — Fase 8: revert del revoke de la 0006.
+--
+-- Las políticas RLS hacen `using (is_family_member())`. Esa función se llama
+-- desde el contexto del rol que ejecuta la query (authenticated), NO como postgres.
+-- SECURITY DEFINER solo cambia bajo qué rol se EJECUTA el cuerpo de la función,
+-- no quién puede LLAMARLA. Por eso necesita GRANT EXECUTE TO authenticated, sino
+-- toda la app revienta con "permission denied for function is_family_member".
+--
+-- El advisor "Public Can Execute SECURITY DEFINER Function" volverá a aparecer
+-- en is_family_member. Se ignora a propósito:
+--   - Función read-only, devuelve un boolean derivable (el propio usuario sabe
+--     si está logueado como family_member).
+--   - No filtra datos sensibles.
+--   - Alternativa "correcta" sería inline la lógica en cada policy con
+--     `using (exists (select 1 from public.family_members where user_id = auth.uid()))`
+--     pero es más verboso y pierde reusabilidad.
+--
+-- handle_new_user queda sin grant a authenticated/anon: solo lo dispara el trigger
+-- on_auth_user_created vía supabase_auth_admin, que tiene perms por default.
+
+grant execute on function public.is_family_member() to authenticated;
