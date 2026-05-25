@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { MedicamentosList } from './_components/MedicamentosList'
+import { PageHeader } from '@/components/PageHeader'
 import type { Medicamento } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -25,14 +26,12 @@ export default async function MedicacionPage() {
   const medicamentos = (data ?? []) as Medicamento[]
 
   return (
-    <div className="p-6 space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium">Medicación</h1>
-        <p className="text-sm text-muted-foreground">
-          Qué toma cada uno, cuándo y cuánto
-        </p>
-      </header>
-
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="Tratamientos"
+        title="Medicación"
+        description="Qué toma cada uno, cuándo y cuánto."
+      />
       <MedicamentosList medicamentos={medicamentos} />
     </div>
   )

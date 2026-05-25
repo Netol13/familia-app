@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { CalendarioList } from './_components/CalendarioList'
 import { unificarEventos } from '@/lib/calendario'
+import { PageHeader } from '@/components/PageHeader'
 import type {
   DocumentoCalendarioLite,
   Evento,
@@ -64,14 +65,12 @@ export default async function CalendarioPage() {
   })
 
   return (
-    <div className="p-6 space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium">Calendario</h1>
-        <p className="text-sm text-muted-foreground">
-          Cumpleaños, vencimientos, turnos y todo lo que se viene
-        </p>
-      </header>
-
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="Lo que se viene"
+        title="Agenda"
+        description="Cumpleaños, vencimientos, turnos y todo lo importante."
+      />
       <CalendarioList
         unificados={unificados}
         eventosCustom={eventos}

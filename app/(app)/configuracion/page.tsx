@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { PageHeader } from '@/components/PageHeader'
 import { PerfilForm } from './_components/PerfilForm'
 import { signOut } from './actions'
 
@@ -20,25 +21,24 @@ export default async function ConfiguracionPage() {
   const email = user?.email ?? ''
 
   return (
-    <div className="p-6 space-y-6 max-w-md mx-auto">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium">Configuración</h1>
-        <p className="text-sm text-muted-foreground">
-          Tu cuenta y la sesión en este dispositivo
-        </p>
-      </header>
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="Tu cuenta"
+        title="Configuración"
+        description="Tu perfil y la sesión en este dispositivo."
+      />
 
-      <Card className="border-border/60 shadow-sm">
+      <Card className="border-border/60" style={{ boxShadow: 'var(--shadow-soft)' }}>
         <CardContent className="p-5 space-y-4">
-          <h2 className="text-lg font-medium">Mi perfil</h2>
+          <h2 className="text-xl font-heading tracking-tight">Mi perfil</h2>
           <PerfilForm nombreActual={nombreActual} email={email} />
         </CardContent>
       </Card>
 
-      <Card className="border-border/60 shadow-sm">
+      <Card className="border-border/60" style={{ boxShadow: 'var(--shadow-soft)' }}>
         <CardContent className="p-5 space-y-3">
-          <h2 className="text-lg font-medium">Sesión</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-xl font-heading tracking-tight">Sesión</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Cerrá la sesión en este dispositivo. La próxima vez vas a necesitar
             el magic link en tu email para volver a entrar.
           </p>

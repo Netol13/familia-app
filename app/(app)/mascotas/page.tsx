@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { MascotasList } from './_components/MascotasList'
+import { PageHeader } from '@/components/PageHeader'
 import type { Mascota, MascotaEvento } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -37,14 +38,12 @@ export default async function MascotasPage() {
   }
 
   return (
-    <div className="p-6 space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium">Mascotas</h1>
-        <p className="text-sm text-muted-foreground">
-          Datos, veterinario, vacunas y controles
-        </p>
-      </header>
-
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="La fauna del hogar"
+        title="Mascotas"
+        description="Datos, veterinario, vacunas y controles."
+      />
       <MascotasList mascotas={mascotas} eventosPorMascota={eventosPorMascota} />
     </div>
   )

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { DocumentosList } from './_components/DocumentosList'
+import { PageHeader } from '@/components/PageHeader'
 import type {
   Documento,
   FamilyMemberLite,
@@ -42,14 +43,12 @@ export default async function DocumentosPage() {
   const mascotas = (mascotasRes.data ?? []) as MascotaLite[]
 
   return (
-    <div className="p-6 space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium">Documentos</h1>
-        <p className="text-sm text-muted-foreground">
-          Facturas, garantías, recetas y papeles importantes del hogar
-        </p>
-      </header>
-
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="Papeles importantes"
+        title="Documentos"
+        description="Facturas, garantías, recetas y todo lo que conviene guardar."
+      />
       <DocumentosList
         documentos={documentos}
         members={members}

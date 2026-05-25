@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import type { Compra, FamilyMemberLite } from '@/lib/types'
+import { PageHeader } from '@/components/PageHeader'
 import { ComprasList } from './_components/ComprasList'
 
 export const dynamic = 'force-dynamic'
@@ -21,14 +22,12 @@ export default async function ComprasPage() {
   const members = (membersRes.data ?? []) as FamilyMemberLite[]
 
   return (
-    <div className="p-6 space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium leading-tight">Lista de compras</h1>
-        <p className="text-sm text-muted-foreground italic">
-          Compartida con toda la familia, en tiempo real
-        </p>
-      </header>
-
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="Compartida en vivo"
+        title="Compras"
+        description="Lo que va sumando la familia, en tiempo real."
+      />
       <ComprasList compras={compras} members={members} />
     </div>
   )

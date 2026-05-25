@@ -23,7 +23,8 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-      className="size-10 rounded-full bg-background/70 backdrop-blur-md border border-border/60 shadow-sm flex items-center justify-center text-foreground hover:bg-accent active:scale-95 transition-all"
+      className="size-10 rounded-full bg-surface/80 backdrop-blur-xl border border-border/70 flex items-center justify-center text-foreground hover:bg-accent active:scale-95 transition-all"
+      style={{ boxShadow: 'var(--shadow-soft)' }}
     >
       {!mounted ? (
         <span className="size-4" />

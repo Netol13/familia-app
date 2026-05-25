@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { ServiciosList } from './_components/ServiciosList'
+import { PageHeader } from '@/components/PageHeader'
 import type { Servicio } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
@@ -24,14 +25,12 @@ export default async function ServiciosPage() {
   const servicios = (data ?? []) as Servicio[]
 
   return (
-    <div className="p-6 space-y-5">
-      <header className="space-y-1">
-        <h1 className="text-3xl font-medium">Servicios</h1>
-        <p className="text-sm text-muted-foreground">
-          Plomero, electricista, piletero y demás del hogar
-        </p>
-      </header>
-
+    <div className="px-5 pt-10 pb-6 space-y-7 max-w-screen-sm mx-auto w-full">
+      <PageHeader
+        eyebrow="Contactos"
+        title="Servicios"
+        description="Plomero, electricista, piletero y demás del hogar."
+      />
       <ServiciosList servicios={servicios} />
     </div>
   )

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent } from '@/components/ui/card'
 import { InstallHint } from '@/components/InstallHint'
 import {
   etiquetaRelativa,
@@ -21,48 +20,12 @@ import { CATEGORIA_EMOJI } from '@/lib/compras'
 
 export const dynamic = 'force-dynamic'
 
-const sections = [
-  {
-    href: '/calendario',
-    title: 'Agenda',
-    description: 'Cumpleaños, vencimientos, turnos y todo lo que se viene',
-    emoji: '📅',
-    countFrom: 'eventos' as const,
-    countLabel: (n: number) => `${n} próxim${n === 1 ? 'o' : 'os'}`,
-  },
-  {
-    href: '/medicacion',
-    title: 'Medicación',
-    description: 'Qué toma cada uno, dosis y horarios',
-    emoji: '💊',
-    countFrom: 'medicamentos' as const,
-    countLabel: (n: number) =>
-      `${n} medicamento${n === 1 ? '' : 's'} activo${n === 1 ? '' : 's'}`,
-  },
-  {
-    href: '/documentos',
-    title: 'Documentos',
-    description: 'Facturas, garantías, recetas y papeles importantes',
-    emoji: '📄',
-    countFrom: 'documentos' as const,
-    countLabel: (n: number) => `${n} documento${n === 1 ? '' : 's'}`,
-  },
-  {
-    href: '/servicios',
-    title: 'Servicios',
-    description: 'Plomero, electricista, piletero y todos los contactos del hogar',
-    emoji: '🔧',
-    countFrom: 'servicios' as const,
-    countLabel: (n: number) => `${n} contacto${n === 1 ? '' : 's'}`,
-  },
-  {
-    href: '/mascotas',
-    title: 'Mascotas',
-    description: 'Datos, vacunas, controles y veterinario',
-    emoji: '🐾',
-    countFrom: 'mascotas' as const,
-    countLabel: (n: number) => `${n} mascota${n === 1 ? '' : 's'}`,
-  },
+const secondarySections = [
+  { href: '/calendario',  title: 'Agenda',     emoji: '📅', countFrom: 'eventos'      as const, suffix: 'próximos' },
+  { href: '/medicacion',  title: 'Medicación', emoji: '💊', countFrom: 'medicamentos' as const, suffix: 'activos'  },
+  { href: '/documentos',  title: 'Documentos', emoji: '📄', countFrom: 'documentos'   as const, suffix: 'guardados'},
+  { href: '/servicios',   title: 'Servicios',  emoji: '🔧', countFrom: 'servicios'    as const, suffix: 'contactos'},
+  { href: '/mascotas',    title: 'Mascotas',   emoji: '🐾', countFrom: 'mascotas'     as const, suffix: ''         },
 ]
 
 const ICONO_TIPO: Record<TipoUnificado, string> = {
@@ -84,7 +47,7 @@ function saludoPorHora(): string {
 
 function tonoUrgencia(tono: 'vencido' | 'pronto' | 'futuro') {
   if (tono === 'vencido') return 'bg-destructive/15 text-destructive'
-  if (tono === 'pronto') return 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
+  if (tono === 'pronto')  return 'bg-amber-500/15 text-amber-700 dark:text-amber-400'
   return 'bg-muted text-muted-foreground'
 }
 
@@ -114,10 +77,7 @@ export default async function Home() {
     comprasRes,
   ] = await Promise.all([
     supabase.from('servicios').select('*', { count: 'exact', head: true }),
-    supabase
-      .from('medicamentos')
-      .select('*', { count: 'exact', head: true })
-      .eq('activo', true),
+    supabase.from('medicamentos').select('*', { count: 'exact', head: true }).eq('activo', true),
     supabase.from('mascotas').select('*', { count: 'exact', head: true }),
     supabase.from('documentos').select('*', { count: 'exact', head: true }),
     supabase.from('eventos').select('*'),
@@ -154,9 +114,8 @@ export default async function Home() {
     mascotas: mascotasCal,
   }).filter((it) => !it.completado)
 
-  // Próximas fechas: ventana 30 días, max 5 items para el panel
   const proximas30 = filtrarPorRango(unificados, 'mes')
-  const proximasParaPanel = proximas30.slice(0, 5)
+  const proximasParaPanel = proximas30.slice(0, 4)
 
   const counts: Record<string, number> = {
     servicios: servCount.count ?? 0,
@@ -169,21 +128,22 @@ export default async function Home() {
   const nombre = member?.nombre ?? 'familia'
 
   return (
-    <div className="p-6 space-y-8">
-      <header className="space-y-1">
-        <p className="text-sm text-muted-foreground">{saludoPorHora()},</p>
-        <h1 className="text-4xl font-medium leading-tight">
-          {nombre}
+    <div className="px-5 pt-10 pb-10 space-y-10 max-w-screen-sm mx-auto w-full">
+      {/* HERO */}
+      <header className="space-y-3">
+        <p className="eyebrow">{saludoPorHora()}</p>
+        <h1 className="text-hero text-[clamp(3.25rem,12vw,5.5rem)]">
+          {nombre}.
         </h1>
-        <p className="text-sm text-muted-foreground italic">
-          Lo del hogar, en un solo lugar
+        <p className="text-sm text-muted-foreground max-w-xs">
+          Lo del hogar, en un solo lugar.
         </p>
       </header>
 
       {pareceEmailPrefix && (
         <Link
           href="/configuracion"
-          className="block rounded-2xl border border-dashed border-border/80 bg-accent/30 px-4 py-3 hover:bg-accent/50 transition-colors"
+          className="block rounded-2xl border border-dashed border-border bg-surface px-4 py-3 hover:bg-accent/40 transition-colors"
         >
           <p className="text-sm">
             👋 ¿Querés que te llamemos por tu nombre?
@@ -194,28 +154,38 @@ export default async function Home() {
         </Link>
       )}
 
+      {/* HERO CARD — Compras (si hay) */}
       {comprasPendientes.length > 0 && (
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-medium">
-                🛒 Lista de compras
-                <span className="ml-2 text-xs font-normal text-muted-foreground">
-                  {comprasPendientes.length} pendiente{comprasPendientes.length === 1 ? '' : 's'}
-                </span>
-              </h2>
-              <Link
-                href="/compras"
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Ver todo →
-              </Link>
+        <Link
+          href="/compras"
+          className="group block relative overflow-hidden rounded-3xl bg-card border border-border/60 p-6 hover:-translate-y-0.5 transition-transform"
+          style={{ boxShadow: 'var(--shadow-hero)' }}
+        >
+          {/* Halo terracota arriba a la derecha */}
+          <div
+            aria-hidden
+            className="absolute -top-16 -right-16 size-56 rounded-full opacity-60 blur-2xl pointer-events-none"
+            style={{ background: 'radial-gradient(closest-side, var(--brand) 0%, transparent 70%)', opacity: 0.18 }}
+          />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="size-2 rounded-full bg-brand" />
+              <p className="eyebrow text-brand/90">Lista de compras</p>
             </div>
-            <ul className="space-y-1.5">
+            <p className="text-3xl font-heading tracking-tight leading-none mb-1">
+              {comprasPendientes.length}
+              <span className="text-sm font-sans font-normal text-muted-foreground ml-2">
+                pendiente{comprasPendientes.length === 1 ? '' : 's'}
+              </span>
+            </p>
+
+            <ul className="mt-4 divide-y divide-border/60">
               {comprasTop3.map((c) => (
-                <li key={c.id} className="flex items-center gap-2 text-sm">
-                  <span className="text-base shrink-0">{CATEGORIA_EMOJI[c.categoria]}</span>
-                  <span className="truncate flex-1">
+                <li key={c.id} className="flex items-center gap-3 py-2">
+                  <span className="text-base shrink-0 w-5 text-center">
+                    {CATEGORIA_EMOJI[c.categoria]}
+                  </span>
+                  <span className="truncate flex-1 text-sm">
                     {c.item}
                     {c.cantidad && (
                       <span className="text-muted-foreground ml-2">· {c.cantidad}</span>
@@ -223,82 +193,92 @@ export default async function Home() {
                   </span>
                 </li>
               ))}
-              {comprasPendientes.length > 3 && (
-                <li className="text-xs text-muted-foreground pl-7 pt-1">
-                  +{comprasPendientes.length - 3} más
-                </li>
-              )}
             </ul>
-          </CardContent>
-        </Card>
-      )}
 
-      {proximasParaPanel.length > 0 && (
-        <Card className="border-border/60 shadow-sm">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-medium">Próximas fechas</h2>
-              <Link
-                href="/calendario"
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                Ver todo →
-              </Link>
+            <div className="mt-4 flex items-center justify-between text-brand">
+              <span className="text-sm font-medium">
+                {comprasPendientes.length > 3
+                  ? `+${comprasPendientes.length - 3} más`
+                  : 'Ver la lista'}
+              </span>
+              <span className="text-lg transition-transform group-hover:translate-x-1">→</span>
             </div>
-            <ul className="space-y-2">
-              {proximasParaPanel.map((it) => {
-                const urgencia = urgenciaDe(it.fecha)
-                return (
-                  <li key={it.id} className="flex items-center gap-3">
-                    <span className="text-xl shrink-0">{ICONO_TIPO[it.tipo]}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm truncate leading-tight">{it.titulo}</p>
-                      {it.subtitulo && (
-                        <p className="text-xs text-muted-foreground truncate">
-                          {it.subtitulo}
-                        </p>
-                      )}
-                    </div>
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-md shrink-0 ${tonoUrgencia(urgencia)}`}
-                    >
-                      {etiquetaRelativa(it.fecha)}
-                    </span>
-                  </li>
-                )
-              })}
-            </ul>
-          </CardContent>
-        </Card>
+          </div>
+        </Link>
       )}
 
-      <div className="grid gap-3">
-        {sections.map((s) => {
-          const n = counts[s.countFrom]
-          return (
-            <Link key={s.href} href={s.href}>
-              <Card className="hover:bg-accent/40 transition-colors border-border/60 shadow-sm">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl leading-none shrink-0">
-                      {s.emoji}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="text-xl font-medium leading-tight">
-                        {s.title}
-                      </h2>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        {n === 0 ? s.description : s.countLabel(n)}
-                      </p>
-                    </div>
-                    <span className="text-muted-foreground text-lg">›</span>
-                  </div>
-                </CardContent>
-              </Card>
+      {/* PRÓXIMAS FECHAS — editorial */}
+      {proximasParaPanel.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="eyebrow">Lo que se viene</p>
+              <h2 className="text-2xl font-heading tracking-tight mt-1">
+                Próximas fechas
+              </h2>
+            </div>
+            <Link
+              href="/calendario"
+              className="text-sm text-brand hover:underline underline-offset-4"
+            >
+              Ver todo →
             </Link>
-          )
-        })}
-      </div>
+          </div>
+          <ul className="divide-y divide-border/60 border-y border-border/60">
+            {proximasParaPanel.map((it) => {
+              const urgencia = urgenciaDe(it.fecha)
+              return (
+                <li key={it.id} className="flex items-center gap-4 py-3.5">
+                  <span className="text-2xl shrink-0 w-8 text-center">
+                    {ICONO_TIPO[it.tipo]}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[15px] truncate leading-tight">{it.titulo}</p>
+                    {it.subtitulo && (
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {it.subtitulo}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`text-xs px-2.5 py-1 rounded-full shrink-0 font-medium ${tonoUrgencia(urgencia)}`}>
+                    {etiquetaRelativa(it.fecha)}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
+
+      {/* GRID 2x2 — módulos secundarios */}
+      <section className="space-y-4">
+        <p className="eyebrow">Atajos</p>
+        <div className="grid grid-cols-2 gap-3">
+          {secondarySections.map((s) => {
+            const n = counts[s.countFrom]
+            return (
+              <Link
+                key={s.href}
+                href={s.href}
+                className="group relative overflow-hidden rounded-2xl bg-card border border-border/60 p-4 hover:bg-accent/30 hover:border-border transition-colors"
+                style={{ boxShadow: 'var(--shadow-soft)' }}
+              >
+                <div className="flex flex-col h-full min-h-[110px] justify-between">
+                  <span className="text-3xl leading-none">{s.emoji}</span>
+                  <div>
+                    <p className="text-base font-heading tracking-tight leading-tight">
+                      {s.title}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {n === 0 ? 'Vacío' : `${n}${s.suffix ? ' ' + s.suffix : ''}`}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </section>
 
       <InstallHint />
     </div>
