@@ -5,7 +5,7 @@ import type { AudioIntentRequest, IntentResult } from '@/lib/audio-intent'
 export const maxDuration = 15
 
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+  'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent'
 
 function buildSystemPrompt(req: AudioIntentRequest): string {
   const mascotasStr =
