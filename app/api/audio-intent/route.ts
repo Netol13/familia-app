@@ -73,8 +73,12 @@ async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: buildSystemPrompt(body) }] },
-        contents: [{ role: 'user', parts: [{ text: body.transcript }] }],
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: buildSystemPrompt(body) + '\n\n---\n\nTexto a clasificar: ' + body.transcript }],
+          },
+        ],
         generationConfig: { maxOutputTokens: 1024, temperature: 0.1 },
       }),
     })
