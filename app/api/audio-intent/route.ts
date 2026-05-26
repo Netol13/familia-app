@@ -5,7 +5,7 @@ import type { AudioIntentRequest, IntentResult } from '@/lib/audio-intent'
 export const maxDuration = 15
 
 const GEMINI_URL =
-  'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 function buildSystemPrompt(req: AudioIntentRequest): string {
   const mascotasStr =
@@ -73,12 +73,8 @@ async function extractIntent(body: AudioIntentRequest): Promise<IntentResult> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: buildSystemPrompt(body) + '\n\n---\n\nTexto a clasificar: ' + body.transcript }],
-          },
-        ],
+        system_instruction: { parts: [{ text: buildSystemPrompt(body) }] },
+        contents: [{ role: 'user', parts: [{ text: body.transcript }] }],
         generationConfig: { maxOutputTokens: 1024, temperature: 0.1 },
       }),
     })
